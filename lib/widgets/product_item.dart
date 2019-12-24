@@ -20,7 +20,7 @@ class ProductItem extends StatelessWidget {
       child: GridTile(
         footer: GridTileBar(
           backgroundColor: Colors.black54,
-          leading: Consumer(
+          leading: Consumer<Product>(
             builder: (ctx, product, _) => IconButton(
               color: Theme.of(context).accentColor,
               icon: Icon(

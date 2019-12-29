@@ -16,22 +16,21 @@ class CartItem extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-
     return Dismissible(
       direction: DismissDirection.endToStart,
-      onDismissed: (direction)=>
-        Provider.of<Cart>(context).removeItem(id),
+      onDismissed: (direction) =>
+          Provider.of<Cart>(context, listen: false).removeItem(id),
       key: ValueKey(id),
       background: Container(
         color: Theme.of(context).errorColor,
-        child: Icon(
+        child: const Icon(
           Icons.delete,
           color: Colors.white,
           size: 40,
         ),
         alignment: Alignment.centerRight,
-        padding: EdgeInsets.only(right: 20),
-         margin: EdgeInsets.symmetric(vertical: 4, horizontal: 15), 
+        padding: const EdgeInsets.only(right: 20),
+        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 15),
       ),
       child: Card(
         margin: EdgeInsets.symmetric(vertical: 4, horizontal: 15),

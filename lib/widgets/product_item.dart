@@ -41,9 +41,12 @@ class ProductItem extends StatelessWidget {
                 cart.addItem(product.id, product.title, product.price),
           ),
         ),
-        child: Image.network(
-          product.imageUrl,
-          fit: BoxFit.cover,
+        child: Hero(
+          tag: product.id,
+          child: Image.network(
+            product.imageUrl,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );

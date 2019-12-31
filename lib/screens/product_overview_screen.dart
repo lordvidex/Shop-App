@@ -22,6 +22,7 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(child: Material(),),
       appBar: AppBar(
         actions: <Widget>[
           Consumer<Cart>(

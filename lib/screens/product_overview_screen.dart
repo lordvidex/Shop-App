@@ -5,6 +5,7 @@ import '../providers/cart.dart';
 import '../widgets/badge.dart';
 import '../widgets/products_grid.dart';
 import '../screens/cart_screen.dart';
+import '../widgets/app_drawer.dart';
 
 
 enum FilterOptions {
@@ -22,7 +23,7 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Drawer(child: Material(),),
+      drawer: AppDrawer(),
       appBar: AppBar(
         actions: <Widget>[
           Consumer<Cart>(

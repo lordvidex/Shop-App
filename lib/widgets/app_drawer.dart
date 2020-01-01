@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/orders.dart';
 import '../screens/orders_screen.dart';
+import '../screens/user_products_screen.dart';
 import './badge.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -36,6 +37,12 @@ class AppDrawer extends StatelessWidget {
                   ),
             onTap: () =>
                 Navigator.pushReplacementNamed(context, OrdersScreen.routeName),
+          ),
+          Divider(),
+          ListTile(
+            leading: Icon(Icons.edit),
+            title: Text('Manage Products'),
+            onTap: () => Navigator.pushReplacementNamed(context, UserProductsScreen.routeName),
           ),
         ],
       ),

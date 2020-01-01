@@ -5,17 +5,19 @@ class Badge extends StatelessWidget {
     Key key,
     @required this.child,
     @required this.value,
+    @required this.alignment,
     this.color,
   }) : super(key: key);
 
   final Widget child;
   final String value;
   final Color color;
+  final AlignmentGeometry alignment;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
-      alignment: Alignment.center,
+      alignment: alignment,
       children: [
         child,
         Positioned(

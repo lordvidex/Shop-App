@@ -28,6 +28,7 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
         actions: <Widget>[
           Consumer<Cart>(
             builder: (_, cart, ch) => Badge(
+              alignment: Alignment.center,
               value: cart.cartCount.toString(),
               child: ch,
             ),

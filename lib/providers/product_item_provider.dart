@@ -42,14 +42,23 @@ class ProductProvider with ChangeNotifier {
     return [..._items];
   }
 
-  List<Product> get favoriteItems{
-    return _items.where((item)=>item.isFavorite).toList();
+  List<Product> get favoriteItems {
+    return _items.where((item) => item.isFavorite).toList();
   }
-  Product getProductById(String id){
-    return _items.firstWhere((item)=>item.id==id);
+
+  Product getProductById(String id) {
+    return _items.firstWhere((item) => item.id == id);
   }
-  void addProduct() {
-    //_items.add();
+
+  void addProduct(Product product) {
+    final newProduct = Product(
+      price: product.price,
+      title: product.title,
+      description: product.description,
+      id: DateTime.now().toString(),
+      imageUrl: product.imageUrl,
+    );
+    _items.add(newProduct);
     notifyListeners();
   }
 }

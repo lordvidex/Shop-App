@@ -12,6 +12,8 @@ class EditProductScreen extends StatefulWidget {
 }
 
 class _EditProductScreenState extends State<EditProductScreen> {
+  var prodId;
+  String appBarTitle = 'Add Product';
   final _form = GlobalKey<FormState>();
   final _priceFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
@@ -20,6 +22,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
   var _editedProduct =
       Product(imageUrl: '', price: 0.0, title: '', id: null, description: '');
 
+  var _initPage = false;
+  var _initValues = {
+    'title':'',
+    'description':'',
+    'price':'',
+    'imageUrl':'',
+  };
   @override
   void dispose() {
     _imageUrlFocusNode.removeListener(_updateImageUrl);
@@ -36,19 +45,47 @@ class _EditProductScreenState extends State<EditProductScreen> {
     super.initState();
   }
 
+  @override
+  void didChangeDependencies() {
+    if (!_initPage) {
+      prodId = ModalRoute.of(context).settings.arguments as String;
+    if(prodId!=null){
+      appBarTitle = 'Edit Product';
+       _editedProduct = Provider.of<ProductProvider>(context, listen: false)
+        .getProductById(prodId);
+        _initValues = {
+          'title':_editedProduct.title,
+          'description':_editedProduct.description,
+          'imageUrl':'',
+          'price':_editedProduct.price.toString(),
+        };
+        _imageUrlController.text = _editedProduct.imageUrl;
+      
+    }
+      _initPage = true;
+    }
+    super.didChangeDependencies();
+  }
+
   void _updateImageUrl() {
     if (!_imageUrlFocusNode.hasFocus) {
       setState(() {});
     }
   }
+
   //add forms to the provider
   void _saveForm() {
     final isValid = _form.currentState.validate();
-    if(!isValid){
-      return ;
+    if (!isValid) {
+      return;
     }
     _form.currentState.save();
-    Provider.of<ProductProvider>(context,listen: false).addProduct(_editedProduct);
+    if(prodId!=null){
+      Provider.of<ProductProvider>(context,listen:false).updateProduct(prodId, _editedProduct);
+    }else{
+      Provider.of<ProductProvider>(context, listen: false)
+        .addProduct(_editedProduct);
+    }
     Navigator.of(context).pop();
   }
 
@@ -56,16 +93,16 @@ class _EditProductScreenState extends State<EditProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Product'),
+        title: Text(appBarTitle),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.save),
+            icon: const Icon(Icons.save),
             onPressed: () => _saveForm(),
           )
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
           child: Card(
             elevation: 4,
@@ -76,6 +113,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 child: Column(
                   children: <Widget>[
                     TextFormField(
+                      initialValue: _initValues['title'],
                       decoration: InputDecoration(labelText: 'Title'),
                       textInputAction: TextInputAction.next,
                       onFieldSubmitted: (_) {
@@ -87,7 +125,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
                             description: _editedProduct.description,
                             id: _editedProduct.id,
                             imageUrl: _editedProduct.imageUrl,
-                            price: _editedProduct.price);
+                            price: _editedProduct.price,
+                            isFavorite: _editedProduct.isFavorite,
+                            );
                       },
                       validator: (value) {
                         if (value.isEmpty) {
@@ -98,6 +138,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       },
                     ),
                     TextFormField(
+                      initialValue: _initValues['price'],
                       decoration: InputDecoration(labelText: 'Price'),
                       textInputAction: TextInputAction.next,
                       keyboardType: TextInputType.number,
@@ -113,6 +154,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                           id: _editedProduct.id,
                           imageUrl: _editedProduct.imageUrl,
                           price: double.parse(price),
+                          isFavorite: _editedProduct.isFavorite,
                         );
                       },
                       validator: (value) {
@@ -128,6 +170,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       },
                     ),
                     TextFormField(
+                      initialValue: _initValues['description'],
                         decoration: InputDecoration(labelText: 'Description'),
                         keyboardType: TextInputType.multiline,
                         maxLines: 3,
@@ -138,7 +181,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
                               description: description,
                               id: _editedProduct.id,
                               imageUrl: _editedProduct.imageUrl,
-                              price: _editedProduct.price);
+                              price: _editedProduct.price,
+                              isFavorite: _editedProduct.isFavorite,
+                              );
                         },
                         validator: (value) {
                           if (value.isEmpty) {
@@ -183,6 +228,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                                   description: _editedProduct.description,
                                   id: _editedProduct.id,
                                   imageUrl: imageUrl,
+                                  isFavorite: _editedProduct.isFavorite,
                                   price: _editedProduct.price);
                             },
                             validator: (value) {

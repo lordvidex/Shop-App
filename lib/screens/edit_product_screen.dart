@@ -24,10 +24,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   var _initPage = false;
   var _initValues = {
-    'title':'',
-    'description':'',
-    'price':'',
-    'imageUrl':'',
+    'title': '',
+    'description': '',
+    'price': '',
+    'imageUrl': '',
   };
   @override
   void dispose() {
@@ -49,19 +49,18 @@ class _EditProductScreenState extends State<EditProductScreen> {
   void didChangeDependencies() {
     if (!_initPage) {
       prodId = ModalRoute.of(context).settings.arguments as String;
-    if(prodId!=null){
-      appBarTitle = 'Edit Product';
-       _editedProduct = Provider.of<ProductProvider>(context, listen: false)
-        .getProductById(prodId);
+      if (prodId != null) {
+        appBarTitle = 'Edit Product';
+        _editedProduct = Provider.of<ProductProvider>(context, listen: false)
+            .getProductById(prodId);
         _initValues = {
-          'title':_editedProduct.title,
-          'description':_editedProduct.description,
-          'imageUrl':'',
-          'price':_editedProduct.price.toString(),
+          'title': _editedProduct.title,
+          'description': _editedProduct.description,
+          'imageUrl': '',
+          'price': _editedProduct.price.toString(),
         };
         _imageUrlController.text = _editedProduct.imageUrl;
-      
-    }
+      }
       _initPage = true;
     }
     super.didChangeDependencies();
@@ -80,11 +79,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
       return;
     }
     _form.currentState.save();
-    if(prodId!=null){
-      Provider.of<ProductProvider>(context,listen:false).updateProduct(prodId, _editedProduct);
-    }else{
+    if (prodId != null) {
       Provider.of<ProductProvider>(context, listen: false)
-        .addProduct(_editedProduct);
+          .updateProduct(prodId, _editedProduct);
+    } else {
+      Provider.of<ProductProvider>(context, listen: false)
+          .addProduct(_editedProduct);
     }
     Navigator.of(context).pop();
   }
@@ -121,20 +121,18 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       },
                       onSaved: (title) {
                         _editedProduct = Product(
-                            title: title,
-                            description: _editedProduct.description,
-                            id: _editedProduct.id,
-                            imageUrl: _editedProduct.imageUrl,
-                            price: _editedProduct.price,
-                            isFavorite: _editedProduct.isFavorite,
-                            );
+                          title: title,
+                          description: _editedProduct.description,
+                          id: _editedProduct.id,
+                          imageUrl: _editedProduct.imageUrl,
+                          price: _editedProduct.price,
+                          isFavorite: _editedProduct.isFavorite,
+                        );
                       },
                       validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please return a valid title';
-                        } else {
-                          return null;
-                        }
+                        return value.isEmpty
+                            ? 'Please return a valid title'
+                            : null;
                       },
                     ),
                     TextFormField(
@@ -170,20 +168,20 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       },
                     ),
                     TextFormField(
-                      initialValue: _initValues['description'],
+                        initialValue: _initValues['description'],
                         decoration: InputDecoration(labelText: 'Description'),
                         keyboardType: TextInputType.multiline,
                         maxLines: 3,
                         focusNode: _descriptionFocusNode,
                         onSaved: (description) {
                           _editedProduct = Product(
-                              title: _editedProduct.title,
-                              description: description,
-                              id: _editedProduct.id,
-                              imageUrl: _editedProduct.imageUrl,
-                              price: _editedProduct.price,
-                              isFavorite: _editedProduct.isFavorite,
-                              );
+                            title: _editedProduct.title,
+                            description: description,
+                            id: _editedProduct.id,
+                            imageUrl: _editedProduct.imageUrl,
+                            price: _editedProduct.price,
+                            isFavorite: _editedProduct.isFavorite,
+                          );
                         },
                         validator: (value) {
                           if (value.isEmpty) {

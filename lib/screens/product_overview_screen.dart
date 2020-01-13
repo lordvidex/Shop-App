@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/cart.dart';
+import '../providers/product_item_provider.dart';
+
+import '../screens/cart_screen.dart';
+
 import '../widgets/badge.dart';
 import '../widgets/products_grid.dart';
-import '../screens/cart_screen.dart';
 import '../widgets/app_drawer.dart';
-
 
 enum FilterOptions {
   Favorites,
@@ -20,6 +22,24 @@ class ProductOverviewScreen extends StatefulWidget {
 
 class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   bool _showOnlyFavorites = false;
+  bool _isInit = false;
+  bool _isLoading = false;
+  @override
+  void didChangeDependencies() {
+    if (!_isInit) {
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<ProductProvider>(context).fetchAndSetProducts().then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+      _isInit = true;
+    }
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,7 +54,8 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
             ),
             child: IconButton(
               icon: Icon(Icons.shopping_cart),
-              onPressed: () => Navigator.of(context).pushNamed(CartScreen.routeName),
+              onPressed: () =>
+                  Navigator.of(context).pushNamed(CartScreen.routeName),
             ),
           ),
           PopupMenuButton(
@@ -60,7 +81,9 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
           'MyShop',
         ),
       ),
-      body: ProductsGrid(_showOnlyFavorites),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ProductsGrid(_showOnlyFavorites),
     );
   }
 }

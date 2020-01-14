@@ -24,12 +24,25 @@ class ProductItem extends StatelessWidget {
           backgroundColor: Colors.black54,
           leading: Consumer<Product>(
             builder: (ctx, product, _) => IconButton(
-              color: Theme.of(context).accentColor,
-              icon: Icon(
-                product.isFavorite ? Icons.favorite : Icons.favorite_border,
-              ),
-              onPressed: () => product.toggleFavoriteStatus(),
-            ),
+                color: Theme.of(context).accentColor,
+                icon: Icon(
+                  product.isFavorite ? Icons.favorite : Icons.favorite_border,
+                ),
+                onPressed: () async {
+                  try {
+                    await product.toggleFavoriteStatus();
+                  } catch (error) {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          error.toString(),
+                          textAlign: TextAlign.center,
+                        ),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                }),
           ),
           title: Text(product.title),
           trailing: IconButton(
@@ -40,7 +53,8 @@ class ProductItem extends StatelessWidget {
               onPressed: () {
                 cart.addItem(product.id, product.title, product.price);
                 Scaffold.of(context).removeCurrentSnackBar();
-                Scaffold.of(context).showSnackBar(SnackBar(duration: Duration(seconds: 2),
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  duration: Duration(seconds: 2),
                   content: Text('Item \'${product.title}\' added to cart'),
                   action: SnackBarAction(
                     label: 'UNDO',

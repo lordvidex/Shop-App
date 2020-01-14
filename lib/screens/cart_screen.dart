@@ -50,29 +50,7 @@ class CartBody extends StatelessWidget {
                   ),
                   backgroundColor: Theme.of(context).primaryColor,
                 ),
-                FlatButton(
-                  onPressed: () {
-                    if (cart.items.values.toList().isEmpty) {
-                      Scaffold.of(context).removeCurrentSnackBar();
-                      Scaffold.of(context).showSnackBar(SnackBar(
-                        content: Text('Cart is Empty!'),
-                      ));
-                    } else {
-                      Provider.of<Orders>(context).addOrder(
-                        cartProducts: cart.items.values.toList(),
-                        total: cart.totalAmount,
-                      );
-                      cart.clear();
-                    }
-                  },
-                  child: Text(
-                    'ORDER NOW',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                OrderButton(cart: cart),
               ],
             ),
           ),
@@ -93,5 +71,50 @@ class CartBody extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class OrderButton extends StatefulWidget {
+  const OrderButton({
+    Key key,
+    @required this.cart,
+  }) : super(key: key);
+
+  final Cart cart;
+
+  @override
+  _OrderButtonState createState() => _OrderButtonState();
+}
+
+class _OrderButtonState extends State<OrderButton> {
+  var _isLoading = false;
+  //TODO: Use [FUTUREBUILDERS] in all these Stateful widgets and remove all
+  //_isLoading variable
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+        textColor: Theme.of(context).primaryColor,
+        onPressed:_isLoading||widget.cart.items.values.toList().isEmpty ? null: () async {
+          setState(() {
+            _isLoading = true;
+          });
+          await Provider.of<Orders>(context).addOrder(
+            cartProducts: widget.cart.items.values.toList(),
+            total: widget.cart.totalAmount,
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          widget.cart.clear();
+        },
+        child: _isLoading
+              ? CircularProgressIndicator()
+              : Text(
+                  'ORDER NOW',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+        );
   }
 }

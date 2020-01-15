@@ -75,6 +75,9 @@ class ProductProvider with ChangeNotifier {
     try {
       const url = 'https://flutter-shop-601f4.firebaseio.com/products.json';
       final response = await http.get(url);
+      if(response.statusCode>= 400){
+        throw HttpException('Couldn\'t fetch Products');
+      }
       final loadedData = json.decode(response.body) as Map<String, dynamic>;
       final List<Product> loadedProducts = [];
       loadedData.forEach((prodId, prodData) {
@@ -122,20 +125,26 @@ class ProductProvider with ChangeNotifier {
     }
   }
 
-  Future<void> deleteProduct(String productId) async{
+  Future<void> deleteProduct(String productId) async {
     //Optimistic deleting implemented here
 
-    final url = 'https://flutter-shop-601f4.firebaseio.com/products/$productId.json';
-    final delprodId = _items.indexWhere((prod)=>productId==prod.id);
+    final url =
+        'https://flutter-shop-601f4.firebaseio.com/products/$productId.json';
+    final delprodId = _items.indexWhere((prod) => productId == prod.id);
     var deletedProduct = _items[delprodId];
 
     _items.removeWhere((prod) => prod.id == productId);
     notifyListeners();
-    final response =await http.delete(url);
-    if(response.statusCode>=400){
-      _items.insert(delprodId,deletedProduct);
-      notifyListeners();
-      throw HttpException('Error deleting product!');
+    try {
+      final response = await http.delete(url);
+      //TODO: IN all providers.. add connection error logics to prevent leak and breaks in app
+      if (response.statusCode >= 400) {
+        _items.insert(delprodId, deletedProduct);
+        notifyListeners();
+        throw HttpException('Error deleting product!');
+      }
+    } catch (error) {
+      throw error;
     }
     deletedProduct = null;
   }

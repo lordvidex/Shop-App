@@ -40,6 +40,25 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
     super.didChangeDependencies();
   }
 
+  Future<void> _refreshAndFetch(BuildContext context) async {
+    try {
+      await Provider.of<ProductProvider>(context).fetchAndSetProducts();
+    } catch (error) {
+      await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+                title: Text('Error'),
+                content: Text(error.toString()),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('Cancel'),
+                    onPressed: () => Navigator.of(ctx).pop(),
+                  )
+                ],
+              ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,7 +102,9 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : ProductsGrid(_showOnlyFavorites),
+          : RefreshIndicator(
+              onRefresh: () => _refreshAndFetch(context),
+              child: ProductsGrid(_showOnlyFavorites)),
     );
   }
 }

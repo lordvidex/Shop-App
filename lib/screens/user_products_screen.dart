@@ -10,12 +10,26 @@ class UserProductsScreen extends StatelessWidget {
   static const routeName = '/user-product';
 
   Future<void> _refreshAndFetch(BuildContext context) async {
-    await Provider.of<ProductProvider>(context).fetchAndSetProducts();
+    try {
+      await Provider.of<ProductProvider>(context).fetchAndSetProducts();
+    } catch (error) {
+      await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+                title: Text('Error'),
+                content: Text(error.toString()),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('Cancel'),
+                    onPressed: () => Navigator.of(ctx).pop(),
+                  )
+                ],
+              ));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final productData = Provider.of<ProductProvider>(context);
     return Scaffold(
       drawer: AppDrawer(),
       appBar: AppBar(
@@ -33,16 +47,18 @@ class UserProductsScreen extends StatelessWidget {
         onRefresh: () => _refreshAndFetch(context),
         child: Padding(
           padding: EdgeInsets.all(8),
-          child: ListView.builder(
-            itemCount: productData.items.length,
-            itemBuilder: (ctx, index) => Column(
-              children: <Widget>[
-                UserProductItem(
-                    productData.items[index].id,
-                    productData.items[index].title,
-                    productData.items[index].imageUrl),
-                Divider(),
-              ],
+          child: Consumer<ProductProvider>(
+            builder: (ctx, productData, _) => ListView.builder(
+              itemCount: productData.items.length,
+              itemBuilder: (ctx, index) => Column(
+                children: <Widget>[
+                  UserProductItem(
+                      productData.items[index].id,
+                      productData.items[index].title,
+                      productData.items[index].imageUrl),
+                  Divider(),
+                ],
+              ),
             ),
           ),
         ),

@@ -36,7 +36,9 @@ class Orders with ChangeNotifier {
         return;
       }
       List<OrderItem> loadedOrders = [];
-      responseData.forEach((orderId, orderData) => loadedOrders.add(OrderItem(
+      responseData.forEach(
+        (orderId, orderData) => loadedOrders.add(
+          OrderItem(
             products: (orderData['products'] as List<dynamic>)
                 .map(
                   (cartI) => CartItem(
@@ -50,7 +52,9 @@ class Orders with ChangeNotifier {
             amount: orderData['amount'],
             dateTime: DateTime.parse(orderData['dateTime']),
             id: orderId,
-          )));
+          ),
+        ),
+      );
       _items = loadedOrders.reversed.toList();
       notifyListeners();
     } catch (error) {

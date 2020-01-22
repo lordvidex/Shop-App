@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/orders.dart';
+import '../providers/auth.dart';
 import '../screens/orders_screen.dart';
 import '../screens/user_products_screen.dart';
 import './badge.dart';
@@ -29,11 +30,14 @@ class AppDrawer extends StatelessWidget {
             title: orders.items.length == 0
                 ? Text('Orders')
                 : Badge(
-                  alignment: Alignment.centerLeft,
+                    alignment: Alignment.centerLeft,
                     value: orders.items.length.toString(),
                     child: Container(
                         padding: EdgeInsets.symmetric(vertical: 10),
-                        child: Text('Orders',textAlign: TextAlign.left,)),
+                        child: Text(
+                          'Orders',
+                          textAlign: TextAlign.left,
+                        )),
                   ),
             onTap: () =>
                 Navigator.pushReplacementNamed(context, OrdersScreen.routeName),
@@ -42,7 +46,17 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.edit),
             title: Text('Manage Products'),
-            onTap: () => Navigator.pushReplacementNamed(context, UserProductsScreen.routeName),
+            onTap: () => Navigator.pushReplacementNamed(
+                context, UserProductsScreen.routeName),
+          ),
+          ListTile(
+            leading: Icon(Icons.exit_to_app),
+            title: Text('Log Out'),
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushReplacementNamed('/');
+              Provider.of<Auth>(context, listen: false).logout();
+            },
           ),
         ],
       ),

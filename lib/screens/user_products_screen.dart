@@ -12,7 +12,7 @@ class UserProductsScreen extends StatelessWidget {
   Future<void> _refreshAndFetch(BuildContext context) async {
     try {
       await Provider.of<ProductProvider>(context, listen: false)
-          .fetchAndSetProducts();
+          .fetchAndSetProducts(false);
     } catch (error) {
       await showDialog(
           context: context,

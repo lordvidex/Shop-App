@@ -75,10 +75,11 @@ class ProductProvider with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProducts([bool general = true]) async {
-    final creatorFilter = '&orderBy="creatorId"&equalsTo=$userId';
+    final creatorFilter =
+        general ? '' : '&orderBy="creatorId"&equalTo="$userId"';
     try {
       var url =
-          'https://flutter-shop-601f4.firebaseio.com/products.json?auth=$authToken${general?'':creatorFilter}';
+          'https://flutter-shop-601f4.firebaseio.com/products.json?auth=$authToken$creatorFilter';
       final response = await http.get(url);
       if (response.statusCode >= 400) {
         throw HttpException('Couldn\'t fetch Products');
@@ -90,7 +91,8 @@ class ProductProvider with ChangeNotifier {
       url =
           'https://flutter-shop-601f4.firebaseio.com/userFavorites/$userId.json?auth=$authToken';
       final favoriteResponse = await http.get(url);
-      final favoriteData = json.decode(favoriteResponse.body);
+      final Map<String, dynamic> favoriteData =
+          json.decode(favoriteResponse.body);
       final List<Product> loadedProducts = [];
       loadedData.forEach((prodId, prodData) {
         final prod = Product(

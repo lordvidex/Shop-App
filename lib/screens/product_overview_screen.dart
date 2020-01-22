@@ -17,7 +17,7 @@ enum FilterOptions {
 
 class ProductOverviewScreen extends StatefulWidget {
   static const routeName = '/prod_overview';
-  
+
   @override
   _ProductOverviewScreenState createState() => _ProductOverviewScreenState();
 }
@@ -32,7 +32,23 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
       setState(() {
         _isLoading = true;
       });
-      Provider.of<ProductProvider>(context).fetchAndSetProducts().then((_) {
+      Provider.of<ProductProvider>(context)
+          .fetchAndSetProducts()
+          .catchError((error) {
+        return showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            content: Text(error.toString()),
+            title: const Text('An error occured'),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text('Okay'),
+              ),
+            ],
+          ),
+        );
+      }).then((_) {
         setState(() {
           _isLoading = false;
         });
@@ -44,7 +60,8 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
 
   Future<void> _refreshAndFetch(BuildContext context) async {
     try {
-      await Provider.of<ProductProvider>(context).fetchAndSetProducts();
+      await Provider.of<ProductProvider>(context, listen: false)
+          .fetchAndSetProducts();
     } catch (error) {
       await showDialog(
           context: context,

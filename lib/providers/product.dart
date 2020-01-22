@@ -22,19 +22,20 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  Future<void> toggleFavoriteStatus() async {
-    final url = 'https://flutter-shop-601f4.firebaseio.com/products/$id.json';
+  Future<void> toggleFavoriteStatus(String token, String userId) async {
+    final url =
+        'https://flutter-shop-601f4.firebaseio.com/userFavorites/$userId/$id.json?auth=$token';
     var prevFavStatus = isFavorite;
 
     //Change the UI
     isFavorite = !isFavorite;
     notifyListeners();
     try {
-      final response = await http.patch(url,
-          body: json.encode({
-            'isFavorite': isFavorite,
-          }));
-      if(response.statusCode >=400){
+      final response = await http.put(
+        url,
+        body: json.encode(isFavorite),
+      );
+      if (response.statusCode >= 400) {
         throw HttpException('Error changing Favorite Status');
       }
     } catch (error) {
@@ -44,5 +45,4 @@ class Product with ChangeNotifier {
     }
     prevFavStatus = null;
   }
-  
 }

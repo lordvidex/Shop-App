@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
 import '../providers/auth.dart';
+import '../models/http_exception.dart';
 
 enum AuthMode { SignUp, Login }
 enum PasswordView { InView, Hidden }
@@ -129,18 +130,55 @@ class _AuthCardState extends State<AuthCard> {
     }
   }
 
+  void showErrorMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('An error occured!'),
+        content: Text(message),
+        actions: <Widget>[
+          FlatButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('Okay'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       setState(() {
         _isLoading = true;
       });
-      if (_authMode == AuthMode.Login) {
-        await Provider.of<Auth>(context, listen: false)
-            .login(_authData['email'], _authData['password']);
-      } else {
-        await Provider.of<Auth>(context, listen: false)
-            .signup(_authData['email'], _authData['password']);
+      try {
+        if (_authMode == AuthMode.Login) {
+          await Provider.of<Auth>(context, listen: false)
+              .login(_authData['email'], _authData['password']);
+        } else {
+          await Provider.of<Auth>(context, listen: false)
+              .signup(_authData['email'], _authData['password']);
+        }
+      } on HttpException catch (error) {
+        var errorMessage = 'An error occured, please try again later';
+        if (error.toString().contains('EMAIL_EXISTS')) {
+          errorMessage = 'User with the email provided already exists.';
+        } else if (error.toString().contains('EMAIL_NOT_FOUND')) {
+          errorMessage =
+              'Couldn\'t login, User with email address does\'nt exist!';
+        } else if (error.toString().contains('INVALID_PASSWORD')) {
+          errorMessage = 'Invalid Password! Please try again';
+        } else if (error.toString().contains('WEAK_PASSWORD')) {
+          errorMessage = 'This password is too weak';
+        } else if (error.toString().contains('INVALID_EMAIL')) {
+          errorMessage = 'Please enter a valid email address';
+        }
+        showErrorMessage(errorMessage);
+      } catch (error) {
+        const errorMessage =
+            'Couldn\'t connect to server, please try again later!';
+        showErrorMessage(errorMessage);
       }
       setState(() {
         _isLoading = false;
@@ -184,9 +222,11 @@ class _AuthCardState extends State<AuthCard> {
                   alignment: Alignment.centerRight,
                   children: <Widget>[
                     TextFormField(
-                      onChanged: (_){setState(() {
-                        _passwordHasValue = true;
-                      });},
+                      onChanged: (_) {
+                        setState(() {
+                          _passwordHasValue = true;
+                        });
+                      },
                       //for the password
                       controller: _passwordController,
                       obscureText:
@@ -204,7 +244,7 @@ class _AuthCardState extends State<AuthCard> {
                       icon: Icon(_passwordView == PasswordView.Hidden
                           ? Icons.visibility
                           : Icons.visibility_off),
-                      onPressed: _passwordHasValue?_togglePasswordView:null,
+                      onPressed: _passwordHasValue ? _togglePasswordView : null,
                     )
                   ],
                 ),

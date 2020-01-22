@@ -7,6 +7,9 @@ import '../models/http_exception.dart';
 import './product.dart';
 
 class ProductProvider with ChangeNotifier {
+  final String authToken;
+  final String userId;
+  ProductProvider(this.authToken, this.userId, this._items);
   List<Product> _items = [
     // Product(
     //   id: 'p1',
@@ -56,7 +59,7 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> updateProduct(String productId, Product product) async {
     final url =
-        'https://flutter-shop-601f4.firebaseio.com/products/$productId.json';
+        'https://flutter-shop-601f4.firebaseio.com/products/$productId.json?auth=$authToken';
     await http.patch(
       url,
       body: json.encode({
@@ -71,14 +74,23 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchAndSetProducts() async {
+  Future<void> fetchAndSetProducts([bool general = true]) async {
+    final creatorFilter = '&orderBy="creatorId"&equalsTo=$userId';
     try {
-      const url = 'https://flutter-shop-601f4.firebaseio.com/products.json';
+      var url =
+          'https://flutter-shop-601f4.firebaseio.com/products.json?auth=$authToken${general?'':creatorFilter}';
       final response = await http.get(url);
-      if(response.statusCode>= 400){
+      if (response.statusCode >= 400) {
         throw HttpException('Couldn\'t fetch Products');
       }
       final loadedData = json.decode(response.body) as Map<String, dynamic>;
+      if (loadedData == null) {
+        return;
+      }
+      url =
+          'https://flutter-shop-601f4.firebaseio.com/userFavorites/$userId.json?auth=$authToken';
+      final favoriteResponse = await http.get(url);
+      final favoriteData = json.decode(favoriteResponse.body);
       final List<Product> loadedProducts = [];
       loadedData.forEach((prodId, prodData) {
         final prod = Product(
@@ -87,7 +99,8 @@ class ProductProvider with ChangeNotifier {
           price: prodData['price'],
           imageUrl: prodData['imageUrl'],
           description: prodData['description'],
-          isFavorite: prodData['isFavorite'],
+          isFavorite:
+              favoriteData == null ? false : favoriteData[prodId] ?? false,
         );
         loadedProducts.add(prod);
       });
@@ -100,7 +113,8 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> addProduct(Product product) async {
     try {
-      const url = 'https://flutter-shop-601f4.firebaseio.com/products.json';
+      final url =
+          'https://flutter-shop-601f4.firebaseio.com/products.json?auth=$authToken';
       var response = await http.post(
         url,
         body: json.encode({
@@ -108,7 +122,7 @@ class ProductProvider with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
-          'isFavorite': product.isFavorite,
+          'creatorId': userId,
         }),
       );
       final newProduct = Product(
@@ -129,7 +143,7 @@ class ProductProvider with ChangeNotifier {
     //Optimistic deleting implemented here
 
     final url =
-        'https://flutter-shop-601f4.firebaseio.com/products/$productId.json';
+        'https://flutter-shop-601f4.firebaseio.com/products/$productId.json?auth=$authToken';
     final delprodId = _items.indexWhere((prod) => productId == prod.id);
     var deletedProduct = _items[delprodId];
 
@@ -137,7 +151,6 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
     try {
       final response = await http.delete(url);
-      //TODO: IN all providers.. add connection error logics to prevent leak and breaks in app
       if (response.statusCode >= 400) {
         _items.insert(delprodId, deletedProduct);
         notifyListeners();

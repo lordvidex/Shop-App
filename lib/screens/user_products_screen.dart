@@ -11,7 +11,8 @@ class UserProductsScreen extends StatelessWidget {
 
   Future<void> _refreshAndFetch(BuildContext context) async {
     try {
-      await Provider.of<ProductProvider>(context).fetchAndSetProducts();
+      await Provider.of<ProductProvider>(context, listen: false)
+          .fetchAndSetProducts();
     } catch (error) {
       await showDialog(
           context: context,
@@ -43,25 +44,31 @@ class UserProductsScreen extends StatelessWidget {
           )
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => _refreshAndFetch(context),
-        child: Padding(
-          padding: EdgeInsets.all(8),
-          child: Consumer<ProductProvider>(
-            builder: (ctx, productData, _) => ListView.builder(
-              itemCount: productData.items.length,
-              itemBuilder: (ctx, index) => Column(
-                children: <Widget>[
-                  UserProductItem(
-                      productData.items[index].id,
-                      productData.items[index].title,
-                      productData.items[index].imageUrl),
-                  Divider(),
-                ],
-              ),
-            ),
-          ),
-        ),
+      body: FutureBuilder(
+        future: _refreshAndFetch(context),
+        builder: (ctx, snapshot) =>
+            snapshot.connectionState == ConnectionState.waiting
+                ? Center(child: CircularProgressIndicator())
+                : RefreshIndicator(
+                    onRefresh: () => _refreshAndFetch(context),
+                    child: Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Consumer<ProductProvider>(
+                        builder: (ctx, productData, _) => ListView.builder(
+                          itemCount: productData.items.length,
+                          itemBuilder: (ctx, index) => Column(
+                            children: <Widget>[
+                              UserProductItem(
+                                  productData.items[index].id,
+                                  productData.items[index].title,
+                                  productData.items[index].imageUrl),
+                              Divider(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
       ),
     );
   }

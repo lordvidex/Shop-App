@@ -13,8 +13,20 @@ class OrderItem extends StatefulWidget {
   _OrderItemState createState() => _OrderItemState();
 }
 
-class _OrderItemState extends State<OrderItem> {
+class _OrderItemState extends State<OrderItem>
+    with SingleTickerProviderStateMixin {
   bool _expanded = false;
+  AnimationController _controller;
+  Animation<double> _angleAnimation;
+  @override
+  void initState() {
+    _controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    _angleAnimation = Tween<double>(begin: 0, end: pi).animate(
+        CurvedAnimation(curve: Curves.fastOutSlowIn, parent: _controller));
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -26,35 +38,55 @@ class _OrderItemState extends State<OrderItem> {
               subtitle: Text(
                 DateFormat('dd/MM/yyyy hh:mm').format(widget.order.dateTime),
               ),
-              trailing: IconButton(
-                icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
-                onPressed: () {
-                  setState(() {
-                    _expanded = !_expanded;
-                  });
-                },
+              trailing: AnimatedBuilder(
+                animation: _angleAnimation,
+                child: IconButton(
+                  icon: Icon(Icons.expand_more),
+                  onPressed: () {
+                    if (!_expanded) {
+                      _controller.forward();
+                    } else {
+                      _controller.reverse();
+                    }
+                    setState(() {
+                      _expanded = !_expanded;
+                    });
+                  },
+                ),
+                builder: (ctx, ch) => Transform.rotate(
+                  angle: _angleAnimation.value,
+                  child: ch,
+                ),
               ),
             ),
-            if (_expanded)
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 4, horizontal: 10,),
-                height: min(widget.order.products.length * 20.0 + 10, 100),
-                child: ListView(
-                  children: widget.order.products
-                      .map(
-                        (prod) => Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(prod.title,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 18)),
-                            Text('${prod.quantity}x  \$${prod.price}'),
-                          ],
-                        ),
-                      )
-                      .toList(),
-                ),
-              )
+            AnimatedContainer(
+              duration: Duration(milliseconds: 300),
+              curve: Curves.easeIn,
+              padding: EdgeInsets.symmetric(
+                vertical: 4,
+                horizontal: 10,
+              ),
+              height: _expanded
+                  ? min(widget.order.products.length * 20.0 + 10, 100)
+                  : 0,
+              child: ListView(
+                children: widget.order.products
+                    .map(
+                      (prod) => Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            prod.title,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                          Text('${prod.quantity}x  \$${prod.price}'),
+                        ],
+                      ),
+                    )
+                    .toList(),
+              ),
+            )
           ],
         ));
   }

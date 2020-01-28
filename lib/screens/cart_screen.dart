@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/cart.dart';
-import '../widgets/cart_item.dart' as ci;
 import '../providers/orders.dart';
+import '../widgets/cart_item.dart' as ci;
 
 class CartScreen extends StatelessWidget {
   static const routeName = '/cart';
@@ -88,8 +88,6 @@ class OrderButton extends StatefulWidget {
 
 class _OrderButtonState extends State<OrderButton> {
   var _isLoading = false;
-  //TODO: Use [FUTUREBUILDERS] in all these Stateful widgets and remove all
-  //_isLoading variable
   @override
   Widget build(BuildContext context) {
     return FlatButton(

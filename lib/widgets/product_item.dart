@@ -15,7 +15,7 @@ class ProductItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
-    final auth = Provider.of<Auth>(context,listen: false);
+    final auth = Provider.of<Auth>(context, listen: false);
     return GestureDetector(
       onTap: () {
         Navigator.of(context)
@@ -32,7 +32,7 @@ class ProductItem extends StatelessWidget {
                 ),
                 onPressed: () async {
                   try {
-                    await product.toggleFavoriteStatus(auth.token,auth.userId);
+                    await product.toggleFavoriteStatus(auth.token, auth.userId);
                   } catch (error) {
                     Scaffold.of(context).showSnackBar(
                       SnackBar(
@@ -67,10 +67,10 @@ class ProductItem extends StatelessWidget {
         ),
         child: Hero(
           tag: product.id,
-          child: Image.network(
-            product.imageUrl,
-            fit: BoxFit.cover,
-          ),
+          child: FadeInImage(
+              image: NetworkImage(product.imageUrl),
+              placeholder: AssetImage('assets/images/product-placeholder.png'),
+              fit: BoxFit.cover),
         ),
       ),
     );

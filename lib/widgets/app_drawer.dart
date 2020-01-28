@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../helpers/custom_route.dart';
 import '../providers/orders.dart';
 import '../providers/auth.dart';
 import '../screens/orders_screen.dart';
@@ -39,8 +40,12 @@ class AppDrawer extends StatelessWidget {
                           textAlign: TextAlign.left,
                         )),
                   ),
-            onTap: () =>
-                Navigator.pushReplacementNamed(context, OrdersScreen.routeName),
+            onTap: () => Navigator.pushReplacement(
+              context,
+              CustomPageRoute(
+                builder: (_) => OrdersScreen(),
+              ),
+            ),
           ),
           Divider(),
           ListTile(

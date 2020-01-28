@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import './helpers/custom_route.dart';
 import './providers/orders.dart';
 import './providers/product_item_provider.dart';
 import './providers/cart.dart';
@@ -48,6 +49,10 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.purple,
             accentColor: Colors.deepOrange,
+            pageTransitionsTheme: PageTransitionsTheme(builders: {
+              TargetPlatform.iOS: CustomPageTransitionBuilder(),
+              TargetPlatform.android: CustomPageTransitionBuilder(),
+            }),
             fontFamily: 'Lato',
           ),
           home: auth.isAuth

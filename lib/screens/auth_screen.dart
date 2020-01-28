@@ -97,7 +97,8 @@ class AuthCard extends StatefulWidget {
   _AuthCardState createState() => _AuthCardState();
 }
 
-class _AuthCardState extends State<AuthCard> {
+class _AuthCardState extends State<AuthCard>
+    with SingleTickerProviderStateMixin {
   AuthMode _authMode = AuthMode.Login;
   bool _isLoading = false;
   bool _passwordHasValue = false;
@@ -105,16 +106,40 @@ class _AuthCardState extends State<AuthCard> {
   final _passwordController = TextEditingController();
   Map<String, String> _authData = {'email': '', 'password': ''};
   final GlobalKey<FormState> _formKey = GlobalKey();
+  AnimationController _controller;
+  Animation<Offset> _offsetAnimation;
+  Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    _controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    _offsetAnimation = Tween<Offset>(begin: Offset(0, -1), end: Offset(0, 0))
+        .animate(
+            CurvedAnimation(curve: Curves.fastOutSlowIn, parent: _controller));
+    //_heightAnimation.addListener(() => setState(() {}));
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(curve: Curves.fastOutSlowIn, parent: _controller));
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   void _switchAuthMode() {
     if (_authMode == AuthMode.Login) {
       setState(() {
         _authMode = AuthMode.SignUp;
       });
+      _controller.forward();
     } else {
       setState(() {
         _authMode = AuthMode.Login;
       });
+      _controller.reverse();
     }
   }
 
@@ -194,7 +219,9 @@ class _AuthCardState extends State<AuthCard> {
         borderRadius: BorderRadius.circular(10),
       ),
       elevation: 8.0,
-      child: Container(
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.fastOutSlowIn,
         height: _authMode == AuthMode.SignUp ? 320 : 260,
         constraints:
             BoxConstraints(minHeight: _authMode == AuthMode.SignUp ? 320 : 260),
@@ -248,22 +275,35 @@ class _AuthCardState extends State<AuthCard> {
                     )
                   ],
                 ),
-                if (_authMode == AuthMode.SignUp)
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Confirm Password',
+                FadeTransition(
+                  opacity: _opacityAnimation,
+                  child: SlideTransition(
+                    position: _offsetAnimation,
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.fastOutSlowIn,
+                      constraints: BoxConstraints(
+                        maxHeight: _authMode == AuthMode.SignUp ? 120 : 0,
+                        minHeight: _authMode == AuthMode.SignUp ? 60 : 0,
+                      ),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Confirm Password',
+                        ),
+                        //enabled: _authMode == AuthMode.SignUp,
+                        obscureText: true,
+                        validator: _authMode == AuthMode.SignUp
+                            ? (value) {
+                                if (value != _passwordController.text) {
+                                  return 'Passwords do not match!';
+                                }
+                                return null;
+                              }
+                            : null,
+                      ),
                     ),
-                    //enabled: _authMode == AuthMode.SignUp,
-                    obscureText: true,
-                    validator: _authMode == AuthMode.SignUp
-                        ? (value) {
-                            if (value != _passwordController.text) {
-                              return 'Passwords do not match!';
-                            }
-                            return null;
-                          }
-                        : null,
                   ),
+                ),
                 SizedBox(height: 20),
                 if (_isLoading)
                   CircularProgressIndicator()
